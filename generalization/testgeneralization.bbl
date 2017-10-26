@@ -1,0 +1,28 @@
+\begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
+
+\bibitem{halleux08:putpatterns}
+P.~de~Halleux and N.~Tillmann.
+\newblock Parameterized test patterns for effective testing with {Pex}.
+\newblock Technical report, Microsoft Research Technical Report, Redmond, WA,
+  September 2008.
+
+\bibitem{tillmann08:pex}
+N.~Tillmann and J.~de~Halleux.
+\newblock Pex-white box test generation for {.NET}.
+\newblock In {\em Proc. International Conference on Tests and Proofs}, pages
+  134--153, 2008.
+
+\bibitem{tillmann05:parameterized}
+N.~Tillmann and W.~Schulte.
+\newblock Parameterized unit tests.
+\newblock In {\em Proc. joint meetings of the European Software Engineering
+  Conference and the ACM SIGSOFT Symposium on the Foundations of Software
+  Engineering}, pages 253--262, 2005.
+
+\bibitem{tillmann06:unit}
+N.~Tillmann and W.~Schulte.
+\newblock Unit tests reloaded: Parameterized unit testing with symbolic
+  execution.
+\newblock {\em IEEE Softw.}, 23(4):38--47, 2006.
+
+\end{thebibliography}
