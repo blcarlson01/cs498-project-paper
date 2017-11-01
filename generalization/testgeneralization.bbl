@@ -1,28 +1,43 @@
 \begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
 
+\bibitem{agitar04:agitator}
+Agitar agitarone, 2007.
+\newblock \url{http://www.agitar.com/solutions/products/agitarone.html}.
+
+\bibitem{icse17_experience}
+M.~M. Almasi, H.~Hemmati, G.~Fraser, and A.~Arcuri.
+\newblock An industrial evaluation of unit test generation: Finding real faults
+  in a financial application.
+\newblock In {\em 39th International Conference on Software Engineering, ICSE
+  2017, Software Engineering in Practice Track}, pages 263--272. IEEE, 2017.
+
 \bibitem{halleux08:putpatterns}
 P.~de~Halleux and N.~Tillmann.
 \newblock Parameterized test patterns for effective testing with {Pex}.
 \newblock Technical report, Microsoft Research Technical Report, Redmond, WA,
   September 2008.
 
-\bibitem{tillmann08:pex}
-N.~Tillmann and J.~de~Halleux.
-\newblock Pex-white box test generation for {.NET}.
-\newblock In {\em Proc. International Conference on Tests and Proofs}, pages
-  134--153, 2008.
+\bibitem{msr07:pex}
+Microsoft.
+\newblock {Microsoft Research Pex and Moles - Isolation and White Box Unit
+  Testing for .NET}, 2016.
+\newblock
+  \url{https://www.microsoft.com/en-us/research/project/pex-and-moles-isolation-and-white-box-unit-testing-for-net/}.
 
-\bibitem{tillmann05:parameterized}
-N.~Tillmann and W.~Schulte.
-\newblock Parameterized unit tests.
-\newblock In {\em Proc. joint meetings of the European Software Engineering
-  Conference and the ACM SIGSOFT Symposium on the Foundations of Software
-  Engineering}, pages 253--262, 2005.
+\bibitem{tagsharp:lib}
+Mono.
+\newblock {taglib-sharp: Library for reading and writing metadata in media
+  files}, 2017.
+\newblock \url{https://github.com/mono/taglib-sharp}.
 
-\bibitem{tillmann06:unit}
-N.~Tillmann and W.~Schulte.
-\newblock Unit tests reloaded: Parameterized unit testing with symbolic
-  execution.
-\newblock {\em IEEE Softw.}, 23(4):38--47, 2006.
+\bibitem{parasoft07:jtest}
+Parasoft {J}test 7.0, 2007.
+\newblock \url{http://www.parasoft.com/jsp/products/home.jsp?product=Jtest}.
+
+\bibitem{pex-white-box-test-generation-for-net}
+N.~Tillmann and P.~de~Halleux.
+\newblock Pex - white box test generation for .net.
+\newblock In {\em Proc. of Tests and Proofs (TAP'08)}, volume 4966, page
+  134–153, Prato, Italy, April 2008. Springer Verlag.
 
 \end{thebibliography}

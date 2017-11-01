@@ -10,6 +10,12 @@
 \documentclass[times, 10pt,twocolumn]{article}
 \usepackage{latex8}
 \usepackage{times}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{float}
+\floatstyle{ruled}
+\newfloat{program}{thp}{lop}
+\floatname{program}{Figure}
 
 %\documentstyle[times,art10,twocolumn,latex8]{article}
 
@@ -20,7 +26,7 @@
 %-------------------------------------------------------------------------
 \begin{document}
 
-\title{An Empirical Study of Test Generalization in an Open Source Project}
+\title{An Empirical Study of Test Generalization in taglib-sharp“}
 
 \author{Xiaokang Xiang\\
 Department of Computer Science\\
@@ -37,58 +43,171 @@ Urbana, IL 61801\\blcrlsn2@illinois.edu\\
 \thispagestyle{empty}
 
 \begin{abstract}
-Note that this sample paper skeleton serves as a guideline for
-helping produce a high-quality project report. If you think that you
-have a better or alternative way for presenting your project results
-(not fully following the guideline here), you shall contact the
-instructor.
-
-In the abstract, you shall describe briefly the motivation of test
-generalization, the name and characteristics of your open source
-project under test, and the findings of your empirical study.
+There are many approaches to automating the generation of conventional unit tests across multiple programming languages.  Although these approaches tend to fail at ensuring the necessary code coverage to find the majority of the issues in the source code.  Furthermore, the manual writing of test cases is labor-intensive and the individual will typically only cover the minimal number of test cases.  One of the ways to help resolve both of these issues with conventional unit tests is to use parameterized unit tests (PUT) where a developer can describe the expected behavior or specifications using symbolic values.  For C\# , a tool called Pex which is an automatic test generation tool will accept these PUTs and generate a set of conventional unit tests.  Pex will attempt to achieve high code coverage by exploring as many branches in the code as possible.  This process of converting conventional unit test into PUTs is referred to as test generalization.  In our empirical study, we used an open source C\# project called taglib-sharp to study the benefits of test generalization. In our study, we found that the test generalization has increased the block coverage by X.XX\% (on average) and also detected X new defects.
 
 \end{abstract}
 
 %-------------------------------------------------------------------------
 \Section{Introduction} \label{sec:intro}
 
-You shall describe with more details on the background of
-parameterized unit tests
-(PUTs)~\cite{tillmann05:parameterized,tillmann06:unit} and
-Pex~\cite{tillmann08:pex}, the motivation of test generalization
-(e.g., despite the benefits of PUTs, many existing unit tests are
-not written in PUTs), how you can generalize conventional unit tests
-(recall what the instructor taught in class), the name and
-characteristics of your open source project under test, and the
-findings of your empirical study.
+In the software development lifecycle, the creation of unit tests is a critical step in the process.  Not only does it help to detect defects at an early stage and ensure quality, but it also allows for future developers to easily make changes to the source code.  The wide adoption of unit testing has led to the creation of a number of automatic unit test generation tools.  A few of those tools include Evosuite~\cite{icse17_experience}, Parasoft JTest~\cite{parasoft07:jtest}, and Agitar JUnit factory~\cite{agitar04:agitator} all of which generate unit tests for the selected source code in their own unique way.  All of these tools only generate conventional unit tests and currently do not accept any parameters.  While each of these tools is getting better at generating unit tests they are still unable to guarantee full code coverage.  Although when compared to the time-consuming task of manually writing these unit tests these tools do tend to improve the quality of code.
 
-You shall list the structure of the rest of the paper.
+An improvement on conventional unit tests was the creation of Parameterized Unit Tests (PUTs), where unlike the conventional tests these accept parameters that provide the inputs to each individual unit test.  These PUTs allow you to provide symbolic values to represent the expected behavior or specifications of the method that is under test.  A tool that does this type of unit testing is called Pex ~\cite{msr07:pex} developed by Microsoft as a test generation tool.  This tool tries to achieve high code coverage by taking these PUTs and generate a minimal set of conventional unit tests for the method under test.  The process that Pex uses is called symbolic execution ~\cite{pex-white-box-test-generation-for-net} to generate the conventional unit tests from PUTs.  When Pex first explores the method under test it uses random values to collect the constraints along the executed path.  From that information, it uses a constraint solver to explore alternate paths in the method by systematically flipping the captured constraints and generate concrete values.  If Pex discovers a new path it will generate a new conventional unit test case.
+
+While using PUTs can achieve better code coverage and is typically more effective it is nontrivial to write PUTs.  When compared to writing conventional unit tests it requires more time and effort, especially to write efficient PUTs.  To address this issue, we use the following procedure, where we initially look at and pick a subset of the existing conventional unit tests to convert to PUTs.  We then identify the arguments and receiver objects of the unit test and where possible promote them to be method arguments.  Next, we convert the conventional unit test assertions into Pex assertions, PexAssert.  During this process, we did experience a number of challenges that prevented some of the conventional unit tests from being converted to PUTs.  One example of this would be when then the method under test required a special file type in order to perform the unit test.  In this instance, Pex is unable to generate the required input for the method under test.  To partially help address this issue we used the feature that Pex provides to create factory methods that let the user provide a method for generating the desired object state for the PUT argument.  While this did not solve all of the issues it did help in some instances.  Another issue that is experienced is that the method under test has a set of assumptions about the inputs to the unit test.  Based on the observations of both the current conventional unit tests and the source code we added a series of assumptions to the PUTs.  In order to do this, we used Pex's built-in method PexAssume to add the required assumptions.  For example, if the input is required to be not null or empty we would use the PexAssume.IsNotNullOrEmpty to ensure the input provided by Pex met the expected requirement.  TODO: Add sentence about if you propose test patterns XXX
+
+In our study, we used the taglib-sharp ~\cite{tagsharp:lib} from the Mono Project.  The Mono Project is sponsored by Microsoft and is an open source implementation of Microsoft's .NET Framework based on the ECMA standards for C\# and the Common Language Runtime.  The taglib-sharp project is their library for reading and writing metadata in media files, including video, audio, and photo formats.  During our research, we found that the test generations XXXXXX the code coverage on average by X.X\% with a maximum of XX.XX\% for a test class.  Additionally, we found that the test generational help cover XX new blocks that were not covered by the original conventional unit test and discovered X new defects.
+
+The rest of the paper is structured as follows Section 2 presents an example from taglib-sharp and explains the procedure for the test generalization.  Section 3 describes the characteristics of taglib-sharp.  Section 4 presents the benefits of test generalization found within our study.  Section 5 presents the categories of conventional unit tests into PUT test patterns.  Section 6 describes the categories of tests that are not amenable for test generalization.  Section 7 describes how the helper techniques provided by Pex are used in our test generalization.  Section 8 discusses the limitations of Pex.  Then finally in Section 9 the conclusion.
 
 %-------------------------------------------------------------------------
 \Section{Example} \label{sec:example}
+\begin{program}
+\footnotesize
+  \begin{verbatim}
+01: public void TestTitle ()
+02: {
+03:   Riff.DivXTag tag = new Riff.DivXTag ();
+04:   Assert.IsTrue (tag.IsEmpty, "Initially empty");
+05:   Assert.IsNull (tag.Title, "Initially null");
+06:   ByteVector rendered = tag.Render ();
+07:   tag = new Riff.DivXTag (rendered);
+08:   Assert.IsTrue (tag.IsEmpty, "Still empty");
+09:   Assert.IsNull (tag.Title, "Still null");
+10:   tag.Title = "012345678901234567890123"
+11:            +"4z5678901234567890123456789";
+12:   Assert.IsFalse (tag.IsEmpty, "Not empty");
+13:   Assert.AreEqual ("012345678901234567"
+14:      +"89012345678901234567890123456789", tag.Title);
+15:   rendered = tag.Render ();
+16:   tag = new Riff.DivXTag (rendered);
+17:   Assert.IsFalse (tag.IsEmpty, "Still not empty");
+18:   Assert.AreEqual ("0123456789012345678"
+19:      +"9012345678901", tag.Title);
+20:   tag.Title = string.Empty;
+21:   Assert.IsTrue (tag.IsEmpty, "Again empty");
+22:   Assert.IsNull (tag.Title, "Again null");
+23:   rendered = tag.Render ();
+24:   tag = new Riff.DivXTag (rendered);
+25:   Assert.IsTrue (tag.IsEmpty, "Still empty");
+26:   Assert.IsNull (tag.Title, "Still null");
+27: }
+\end{verbatim}
+  \caption{Conventional Unit Test from the Riff folder in taglib-sharp.}
+\end{program}
+\begin{program}
+\footnotesize
+  \begin{verbatim}
+01: [PexMethod(MaxRunsWithoutNewTests = 200)]
+02: public void FullTagClearTest(
+03:        Riff.DivXTag tag, 
+04:        string title, string[] performers, 
+05:        uint year, string comment, 
+07:        string[] genres )
+08: {
+09:    tag.Title = title;
+10:    tag.Performers = performers;
+11:    tag.Comment = comment;
+12:    tag.Genres = genres;
+13:    tag.Year = year;
+14:    PexAssert.AreEqual(tag.Title, title);			
+15:    PexAssert.AreEqual(tag.Performers.Length,
+16:          performers.Length);
+17:    PexAssert.AreEqual(tag.Comment, comment);
+18:    PexAssert.AreEqual(tag.Genres.Length, 
+19:         genres.Length);
+20:    PexAssert.AreEqual(tag.Year, year);
+21:    //Clear
+22:    PexAssert.AreEqual(false, tag.IsEmpty);
+23:    tag.Clear();
+24:    PexAssert.IsTrue(tag.IsEmpty);
+25:    }
+\end{verbatim}
+  \caption{PUT Skeleton for the Conventional Unit Test.}
+\end{program}
 
-You shall give an example conventional unit test (which is preferred
-to be from your open source project under test) and illustrate the
-procedure of test generalization with this example.
+In this section, we will explain our procedure for the test generalization of conventional unit tests using Pex.  We use the taglib-sharp test case TestTitle shown in Figure 1 as an illustrative example for explaining our procedure.  The objective of this unit test is to verify the behavior of the title field in the DivXTag class.  To generalize this test case, we initially identify the concrete values used in the test case.  In this example, it includes the concrete value "0123456789012345678901234z567890123456789012...."  We can replace this concrete and similar values with a symbolic value making them arguments for a PUTs.  An advantage of replacing these concrete values with symbolic values is that Pex can generate concrete values based on the constraints encountered by taking different paths of the method under test.  
 
+Initially, we used the conventional unit tests to identify which PUT pattern the test belongs based on Halleux and Tillmann~\cite{halleux08:putpatterns}.  Using the patterns in the paper can in the process of generalizing conventional unit test into PUTs.  In our example in Figure 1, it matches the pattern for Roundtrip, where the test first sets the Title field and then asserts that it matches the value from the field's getter method.  Should one of the conventional unit test not fall into any of the predefined patterns we will define a new pattern for the conventional unit test.
+
+In Figure 2 it shows the skeleton of the PUT after generalizing the concrete values and combining multiple conventional unit tests into a single PUT.  The PUT accepts six different parameters: Riff.DivXTag tag, title, list of performers, year, comment, and a list of genres.  In the original conventional unit test TestTitle, it switched back and forth testing whether the title field was empty or matched the provided value.  This was consistent with the rest of the related unit tests like TestComment which executed a very similar repeating pattern.  In our PUT skeleton, Figure 2, we simplified the series of unit tests into one PUT that can test each of the fields at once thereby reducing the number of unit tests to maintain.  Additionally, our PUT is able to test multiple values for title compared to the static values provided in TitleTest, Figure 1, as shown in lines 10-18.   These are two of the advantages of using PUTs over conventional unit test as these two simplifications increased the code coverage and reduced the number of conventional unit tests without changing the behavior being tested.  As illustrated in Figure 2 we also converted the assertions to PexAssert to test the behavior.  The only additional assertions added to Figure 2 was combining the TestClear conventional unit test into our PUT as a separate unit test is not necessary and is more efficient to test this functionality while testing all of the fields.
+
+While Pex can handle parameters that are of primitive types like string and integer, it, however, has problems when it comes to non-primitive types like the Riff.DivXTag in our example, Figure 2.  Pex will attempt to guess at how to build the object, but you may have to assist in the process by creating a factory method to tell Pex how to create the object.  Additionally, to assist Pex, users can provide assumptions in the factory method to aid in the creation of the object, just like in the PUTs themselves.  For example, the factory for the Riff.DivXTag object, as shown in Figure 3, is fairly simple where it constructs a Riff.DivXTag object with no parameters.  This particular factory may need to be further explored in the future as the class provides multiple ways to construct the Riff.DivXTag object.
+
+\begin{program}
+\footnotesize
+  \begin{verbatim}
+01: public static partial class DivXTagFactory
+02: {
+03:   [PexFactoryMethod(typeof(DivXTag))]
+04:   public static DivXTag Create()
+05:    {
+06:      DivXTag divXTag = new DivXTag();
+07:      return divXTag;
+08:     }
+09: }
+\end{verbatim}
+  \caption{Factory Method to assist Pex}
+\end{program}
+
+The last phase of test generalization process is to define any assumptions that need to be made for Pex to use.  Without these assumptions, Pex by default will generate null and empty values for the PUT arguments.  To address this issue for the Riff.DivXTag we annotate it with the tag PexAssumeUnderTest, which tells Pex that this value should not be null and be of the same type as the argument.  For those arguments that we do not want Pex to provide null or empty, we add PexAssume.IsNotNullOrEmpty, which tells Pex we do not want either of these cases.  Instead of null or empty Pex will provide one or more "\\0" to those arguments.  Examples of both the PexAssumeUnderTest and PexAssume are shown in Figure 4 on lines 3 and lines 9-12.  Figure 4 also shows our completed PUT for the conventional unit test.
+
+\begin{program}
+\footnotesize
+  \begin{verbatim}
+01: [PexMethod(MaxRunsWithoutNewTests = 200)]
+02: public void FullTagClearTest(
+03:    [PexAssumeUnderTest]Riff.DivXTag tag, 
+04:        string title, string[] performers, 
+05:        uint year, string comment, 
+07:        string[] genres )
+08: {
+09:    PexAssume.IsNotNullOrEmpty(title);			
+10:    PexAssume.IsNotNull(genres);
+11:    PexAssume.IsNotNull(performers);
+12:    PexAssume.IsNotNullOrEmpty(comment);			
+13:    tag.Title = title;
+14:    tag.Performers = performers;
+15:    tag.Comment = comment;
+16:    tag.Genres = genres;
+17:    tag.Year = year;
+18:    PexAssert.AreEqual(tag.Title, title);			
+19:    PexAssert.AreEqual(tag.Performers.Length,
+20:          performers.Length);
+21:    PexAssert.AreEqual(tag.Comment, comment);
+22:    PexAssert.AreEqual(tag.Genres.Length, 
+23:         genres.Length);
+24:    PexAssert.AreEqual(tag.Year, year);
+25:    //Clear
+26:    PexAssert.AreEqual(false, tag.IsEmpty);
+27:    tag.Clear();
+28:    PexAssert.IsTrue(tag.IsEmpty);
+29:    }
+\end{verbatim}
+  \caption{Complete PUT for the Conventional Unit Test.}
+\end{program}
 %-------------------------------------------------------------------------
 \Section{Open Source Project Under Test} \label{sec:subject}
+aldsfkjasdfja
 
-You shall give details on what the project is about, and the
-characteristics of the project's production code base (such as the
-number of classes, the number of methods, the number of public
-methods, and the lines of code), and the project's test code base
-(such as the number of test classes, the number of test methods, and
-the lines of test code). Note that you may use some existing tools
-for producing these metrics; use your Google skills to find out
-these tools for you to use!
 
-If you do not generalize all the conventional test cases for the
-open source project, you should list the characteristics of the
-portion that you focus on (e.g., showing the similar metrics listed
-above for the focused portion). You may give some justification on
-why you focus on your selected portion instead of other conventional
-test classes.
+\begin{table}[h]
+\centering
+    \begin{tabular}{| l | l |}
+    \hline
+    \textbf{Attribute}& \textbf{Value}  \\ \hline
+    Number of Classes &  242 \\ \hline
+    Number of Methods &  3,498  \\ \hline
+    Number of Public Methods & 2,928  \\ \hline
+    Lines of Code & 15,578  \\ \hline
+    Number of Test Classes &  175 \\ \hline
+    Number of Test Methods &  980 \\ \hline
+    Lines of Test Code &  19,007 \\ \hline
+    \end{tabular}
+    \caption{Code Metrics for taglib-sharp} \label{tab:sometab}
+\end{table}
+
+
 
 %-------------------------------------------------------------------------
 \Section{Benefits of Test Generalization} \label{sec:benefits}

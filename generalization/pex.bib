@@ -28,6 +28,15 @@
  }
 %   note = {\url{http://research.microsoft.com/Pex/articles/pexpatterns.pdf}},
 
+@inproceedings{icse17_experience,
+    author    = {M. Moein Almasi and Hadi Hemmati and Gordon Fraser and Andrea Arcuri},
+    TITLE={An Industrial Evaluation of Unit Test Generation: Finding Real Faults in a Financial Application},
+    YEAR={2017},
+    pages     = {263--272},
+    booktitle     = {39th International Conference on Software Engineering, ICSE 2017, Software Engineering in Practice Track},
+    publisher = {IEEE},
+}
+
 
 @MISC{developertesting,
    title = {Developer Testing},
@@ -885,6 +894,28 @@ location = {Chicago, IL},
   type = {Technical Report},
   number = {CS-4-105},
   address = {Fort Collins, Colorado},
+}
+
+@inproceedings{pex-white-box-test-generation-for-net,
+author = {Tillmann, Nikolai and de Halleux, Peli},
+title = {Pex - White Box Test Generation for .NET},
+booktitle = {Proc. of Tests and Proofs (TAP'08)},
+year = {2008},
+month = {April},
+abstract = {
+
+Pex automatically produces a small test suite with high code coverage for a .NET program. To this end, Pex performs a systematic program analysis (using dynamic symbolic execution, similar to path-bounded model-checking) to determine test inputs for Parameterized Unit Tests. Pex learns the program behavior by monitoring execution traces. Pex uses a constraint solver to produce new test inputs which exercise different program behavior. The result is an automatically generated small test suite which often achieves high code coverage. In one case study, we applied Pex to a core component of the .NET runtime which had already been extensively tested over several years. Pex found errors, including a serious issue.
+
+
+},
+publisher = {Springer Verlag},
+url = {https://www.microsoft.com/en-us/research/publication/pex-white-box-test-generation-for-net/},
+address = {Prato, Italy},
+pages = {134–153},
+journal = {},
+volume = {4966},
+chapter = {},
+isbn = {},
 }
 
 @INPROCEEDINGS{ammons02:mining,
@@ -4634,14 +4665,6 @@ location = {Chicago, IL},
 
 
 
-@misc{nanoxml,
-key = {nanoxml},
-author = {{Marc De Scheemaecker}},
-title = {\textsc{NanoXML}: a small XML parser for {J}ava},
-%howpublished = {\url{http://nanoxml.n3.net}},
-year = {2002},
-}
-
 @misc{jaba,
 key = {jaba},
 author = {{Aristotle Research Group -- College of Computing, Georgia Institute o
@@ -4721,11 +4744,18 @@ pages = {402-411},
    year = {2007}
 }
 
+@MISC{tagsharp:lib,
+  title={{taglib-sharp: Library for reading and writing metadata in media files}},
+  author={Mono},
+  year={2017},
+  note={\url{https://github.com/mono/taglib-sharp}}
+}
 
 @MISC{msr07:pex,
-  title = {{Microsoft Research Foundation of Software Engineering Group, Pex: Dynamic Analysis and Test Generation for .NET}},
-  year = {2007},
-  note = {\url{http://research.microsoft.com/Pex/}},
+  title = {{Microsoft Research Pex and Moles - Isolation and White Box Unit Testing for .NET}},
+  author={Microsoft},
+  year = {2016},
+  note = {\url{https://www.microsoft.com/en-us/research/project/pex-and-moles-isolation-and-white-box-unit-testing-for-net/}},
 }
 
 
