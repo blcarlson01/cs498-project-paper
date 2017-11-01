@@ -188,7 +188,10 @@ The last phase of test generalization process is to define any assumptions that 
 \end{program}
 %-------------------------------------------------------------------------
 \Section{Open Source Project Under Test} \label{sec:subject}
-aldsfkjasdfja
+
+taglib-sharp is part of the Mono Project which is an open source implementation of Microsoft's .NET Framework based on the ECMA standards for C\# and the Common Language Runtime ~\cite{tagsharp:lib}.  The taglib-sharp library of the Mono Project is focused on the reading and writing metadata in media files, including video, audio, and photo formats.  It is written in C\# and is actively being developed as it has over 71 commits in the last year.  It is also being actively followed with 83 watchers, 425 stars, and 170 forks on GitHub as of November 2017.  For its current test library, it is using conventional unit test and making use of test fixtures along with a number of sample files used for testing.  
+
+The reason for choosing taglib-sharp for our test generalization is the amount of documentation and examples available in the GitHub repository.  Additionally, it contains a large number of unit tests that cover 72.26\% of the current code base, which allows for a better understanding of the library and provides a number of potential unit tests that could be converted to PUTs.  The current source code of the taglib-sharp library includes 242 classes and about 15K LOC.  The test code includes 175 classes with about 19K LOC.  For the purpose of this study, we primarily choose to focus on the tagging classes within the different files types handled by taglib-sharp.  Since these are a better fit for test generalization and use by Pex than trying to work with the sample files themselves which Pex currently does not handle well.
 
 
 \begin{table}[h]
