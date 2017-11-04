@@ -16,6 +16,7 @@
 \floatstyle{ruled}
 \newfloat{program}{thp}{lop}
 \floatname{program}{Figure}
+\usepackage{multirow}
 
 %\documentstyle[times,art10,twocolumn,latex8]{article}
 
@@ -54,7 +55,7 @@ In the software development lifecycle, the creation of unit tests is a critical 
 
 An improvement on conventional unit tests was the creation of Parameterized Unit Tests (PUTs), where unlike the conventional tests these accept parameters that provide the inputs to each individual unit test.  These PUTs allow you to provide symbolic values to represent the expected behavior or specifications of the method that is under test.  A tool that does this type of unit testing is called Pex ~\cite{msr07:pex} developed by Microsoft as a test generation tool.  This tool tries to achieve high code coverage by taking these PUTs and generate a minimal set of conventional unit tests for the method under test.  The process that Pex uses is called symbolic execution ~\cite{pex-white-box-test-generation-for-net} to generate the conventional unit tests from PUTs.  When Pex first explores the method under test it uses random values to collect the constraints along the executed path.  From that information, it uses a constraint solver to explore alternate paths in the method by systematically flipping the captured constraints and generate concrete values.  If Pex discovers a new path it will generate a new conventional unit test case.
 
-While using PUTs can achieve better code coverage and is typically more effective it is nontrivial to write PUTs.  When compared to writing conventional unit tests it requires more time and effort, especially to write efficient PUTs.  To address this issue, we use the following procedure, where we initially look at and pick a subset of the existing conventional unit tests to convert to PUTs.  We then identify the arguments and receiver objects of the unit test and where possible promote them to be method arguments.  Next, we convert the conventional unit test assertions into Pex assertions, PexAssert.  During this process, we did experience a number of challenges that prevented some of the conventional unit tests from being converted to PUTs.  One example of this would be when then the method under test required a special file type in order to perform the unit test.  In this instance, Pex is unable to generate the required input for the method under test.  To partially help address this issue we used the feature that Pex provides to create factory methods that let the user provide a method for generating the desired object state for the PUT argument.  While this did not solve all of the issues it did help in some instances.  Another issue that is experienced is that the method under test has a set of assumptions about the inputs to the unit test.  Based on the observations of both the current conventional unit tests and the source code we added a series of assumptions to the PUTs.  In order to do this, we used Pex's built-in method PexAssume to add the required assumptions.  For example, if the input is required to be not null or empty we would use the PexAssume.IsNotNullOrEmpty to ensure the input provided by Pex met the expected requirement.  TODO: Add sentence about if you propose test patterns XXX
+While using PUTs can achieve better code coverage and is typically more effective it is nontrivial to write PUTs.  When compared to writing conventional unit tests it requires more time and effort, especially to write efficient PUTs.  To address this issue, we use the following procedure, where we initially look at and pick a subset of the existing conventional unit tests to convert to PUTs.  We then identify the arguments and receiver objects of the unit test and where possible promote them to be method arguments.  Next, we convert the conventional unit test assertions into Pex assertions, PexAssert.  During this process, we did experience a number of challenges that prevented some of the conventional unit tests from being converted to PUTs.  One example of this would be when then the method under test required a special file type in order to perform the unit test.  In this instance, Pex is unable to generate the required input for the method under test.  To partially help address this issue we used the feature that Pex provides to create factory methods that let the user provide a method for generating the desired object state for the PUT argument.  While this did not solve all of the issues it did help in some instances.  Another issue that is experienced is that the method under test has a set of assumptions about the inputs to the unit test.  Based on the observations of both the current conventional unit tests and the source code we added a series of assumptions to the PUTs.  In order to do this, we used Pex's built-in method PexAssume to add the required assumptions.  For example, if the input is required to be not null or empty we would use the PexAssume.IsNotNullOrEmpty to ensure the input provided by Pex met the expected requirement.  //TODO: Add sentence about if you propose test patterns XXX
 
 In our study, we used the taglib-sharp ~\cite{tagsharp:lib} from the Mono Project.  The Mono Project is sponsored by Microsoft and is an open source implementation of Microsoft's .NET Framework based on the ECMA standards for C\# and the Common Language Runtime.  The taglib-sharp project is their library for reading and writing metadata in media files, including video, audio, and photo formats.  During our research, we found that the test generations XXXXXX the code coverage on average by X.X\% with a maximum of XX.XX\% for a test class.  Additionally, we found that the test generational help cover XX new blocks that were not covered by the original conventional unit test and discovered X new defects.
 
@@ -174,15 +175,18 @@ The last phase of test generalization process is to define any assumptions that 
 18:    PexAssert.AreEqual(tag.Title, title);			
 19:    PexAssert.AreEqual(tag.Performers.Length,
 20:          performers.Length);
-21:    PexAssert.AreEqual(tag.Comment, comment);
-22:    PexAssert.AreEqual(tag.Genres.Length, 
-23:         genres.Length);
-24:    PexAssert.AreEqual(tag.Year, year);
-25:    //Clear
-26:    PexAssert.AreEqual(false, tag.IsEmpty);
-27:    tag.Clear();
-28:    PexAssert.IsTrue(tag.IsEmpty);
-29:    }
+21:    PexAssert.AreEqual(tag.JoinedPerformers,
+22:          string.Join("; ", performers));
+23:    PexAssert.AreEqual(tag.Comment, comment);
+24:    PexAssert.AreEqual(tag.Genres.Length, 
+25:         genres.Length);
+26:    PexAssert.AreEqual(tag.JoinedGenres, 
+27:         string.Join("; ", genres));
+28:    PexAssert.AreEqual(tag.Year, year);
+29:    PexAssert.AreEqual(false, tag.IsEmpty);
+30:    tag.Clear();
+31:    PexAssert.IsTrue(tag.IsEmpty);
+32: }
 \end{verbatim}
   \caption{Complete PUT for the Conventional Unit Test.}
 \end{program}
@@ -215,22 +219,58 @@ The reason for choosing taglib-sharp for our test generalization is the amount o
 %-------------------------------------------------------------------------
 \Section{Benefits of Test Generalization} \label{sec:benefits}
 
-You shall describe the percentage of conventional unit tests that
-you can generalize to PUTs and the percentage of convectional unit
-tests that you cannot.
+For the taglib-sharp project of the Mono framework, there are a total of 175 test classes that contain a total of 980 conventional test methods.  Of these 175 test classes, we generalized XX test classes that contain XX conventional unit tests into XX PUTs.  While we tried to generalize as many of the test methods as possible in these classes a certain percentage of the test methods were not amenable for test generalization.
+The results of our test generalization are shown in Table 2.  The column labeled "Test Class" shows the name of the test class we choose to convert to PUTs.  The next column labeled "Test Methods" show the statistics of the existing conventional unit test methods, the test methods that were not amenable to test generalization, the percentages of those test that were amenable, and finally the number of PUTs that were created.  The details of the test methods that were not amenable to test generalization can be found in section 6 of this paper.  The next column labeled "Coverage" shows the block coverage reported from executing test cases of each type of unit test conventional and PUT.  The final two columns show the number of new blocks covered by PUTs and the number of new defects found from using PUTs.  In the majority of cases, we found that PUTs were able to achieve high code coverage while also covering new blocks that were not covered by the conventional unit tests.
 
-For those that are amenable to test generalization, you shall list
-and compare the code coverage achieved by the original conventional
-unit tests and your generalized PUTs (together with their generated
-tests by Pex). If you observe some new abnormal behaviors indicating
-potential faults (such as new uncaught exceptions or unexpected
-assertion violations), you can also describe them as benefits of the
-PUTs. When you list code coverage, you can list details (test class
-by test class or test method by test method) or just list the
-aggregated statistics for all the test classes or test methods. How
-much detailed you want get into depends on the page limit and how
-you want to devote the limited space for showing the best (most
-interesting) results or findings from your course project.
+ //TODO: if there was a decrease include a sentence here about it and talk about a couple of examples from the filled in table
+
+During our test generalization process, we found that there were a number of benefits to include the increase in code coverage, the discovery of new defects, and the reduction in conventional unit tests.  For example, there were numerous cases where we could combine a number of conventional unit tests into a single PUT that not only covered the original test cases but provided better code coverage and found new defects.  The next three subsections 4.1 Code Coverage, 4.2 Defects, and 4.3 Test Code will explain these in more detail.
+
+
+\begin{table*}[t]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+\multirow{2}{*}{Test Class} & \multicolumn{4}{c|}{Test Methods}       & \multicolumn{2}{c|}{Coverage} & \multicolumn{1}{c|}{\multirow{2}{*}{New Blocks}} & \multirow{2}{*}{Defects} \\ \cline{2-7}
+                            & Conventional & Amenable & Percent & PUT & Conventional       & PUT      & \multicolumn{1}{c|}{}                                 &                          \\ \hline
+              		AacFormatTest.cs  &  5            & 0         & 0\%        &  11   &        67.78\%            &  75.56\%        &                     7                                  &         3                 \\ \hline
+                         ApeTest.cs  &        29      &    29      &  100\%      &    106 &              62.09\%      &  83.88\%        &                 154                                      &         5                 \\ \hline
+                         AsfTest.cs   &       28       &     28     &   100\%      &   92  &     81.62\%               &     77.26\%     &      0                                                 &               15          \\ \hline
+                         DivXTest.cs   &     7         &      7    &    100\%     &   20  &         88.06\%           &      100\%    &       16                                                &        17                  \\ \hline
+                         Id3V1Test.cs   &    9          &    9      &    100\%     &  2   &            87.88\%        &   94.55\%       &                  11                                     &             16             \\ \hline
+                            &              &          &         &     &                    &          &                                                       &                          \\ \hline
+                            &              &          &         &     &                    &          &                                                       &                          \\ \hline
+                            &              &          &         &     &                    &          &                                                       &                          \\ \hline
+\end{tabular}
+\caption{Benefits of Test Generalization}
+\label{my-label}
+\end{table*}
+
+\SubSection{Code Coverage}
+
+When using generalized unit test cases, you typically cover more conditions that can drastically increase code coverage as is shown in Table 2. 
+
+//TODO: add an example of the largest code coverage increase
+
+This additional code coverage will typically include new blocks of code that were not covered by the original conventional unit tests.
+
+//TODO: add an example of increased block coverage
+
+While PUTs many have increased code coverage and covered new blocks of code this was not the case in every scenario.
+
+//TODO: add an example where coverage is lower than conventional.
+
+In section 8 we describe the limitations of Pex that we experienced during our empirical study.
+
+\SubSection{Defects}
+
+Our generalized conventional unit tests discovered XX new defects that were not detected by the original conventional unit tests.
+
+//TODO: add an example of a new defect detected and explain to include what the PUT looks like
+
+\SubSection{Test Code}
+
+The process of test generalization was able to significantly reduce the test code as shown in Table 2.  In a number of cases relating to the different types of Tag classes, we were able to combine multiple conventional unit tests into a single PUT.  One example of this is in Figure 4, which is of the pattern type Roundrip, where we were able to combine six separate conventional unit tests into one PUT.  This one PUT was able to achieve higher code coverage and discover new defects in the process.  Additional details about the example in Figure 4 can be found in section 2. Example.
 
 %-------------------------------------------------------------------------
 \Section{Categorization of Conventional Unit Tests}
@@ -310,20 +350,18 @@ If you find no such cases, you can state so.
 %-------------------------------------------------------------------------
 \Section{Limitations of Pex or PUTs} \label{sec:limitations}
 
-You shall summarize the limitations of Pex in terms of supporting
-your test generalization or test generation for your PUTs. You shall
-also summarize the limitations of PUTs (e.g., some behavior cannot
-easily be expressed in PUTs and call for new types of tests or
-specification forms), which could be related to cases for not being
-amenable to test generalization described earlier.
+The most substantial limitation we found through test generalization from conventional unit test to PUTS, using Pex, is the amount of time and effort it takes to create good PUTs compared to conventional unit tests.  While the conventional unit tests may not cover all of the possible branches they take less time to write.  This could change in the future after developers have spent more time using Pex or a similar tool and become more familiar and experts writing PUTs.
 
-If you find no such cases, you can state so.
+Another limitation in using Pex to generate conventional unit tests from PUTs is the values that Pex currently generates do not always represent actual values used in the program.  While the values used may help find issues within the method it may not cover a particular set of values you would like to test.  This may result in needing a few conventional unit test to supplement the PUTs to ensure your testing the particular values you want to test.
+
+In our empirical study using taglib-sharp, the most consistent limitation we discovered was Pex not understanding the File class that is used extensively through taglib-sharp's library.  Pex does try to guess on how to create the file but is unable to do so successfully.  In a couple of cases, we use Pex's factory methods to tell Pex to use a sample file that is included with the project's test suite.  However, this process has had limited success.
 
 %-------------------------------------------------------------------------
 \Section{Conclusion}
 
-Your conclusion can be structured similar to the structure of your
-abstract. But do not just copy your abstract here.
+In our empirical study, we investigated the benefits of test generalization.  We did this through the process of taking existing conventional unit tests and converting them into parameterized unit tests (PUTs).  The open source project used for this process was taglib-sharp where we generalized XX conventional unit tests into XX PUTs.  From the test generalization process, we found the following benefits: an increase to block coverage, on average, by X.XX\% and X new defects found.  For future work, to further explore the strengths and weaknesses of test generalization we plan to generalize more conventional unit tests and create new PUTs where necessary.  This will allow us to potentially find new defects and increase the overall block coverage.
+
+//TODO: Add a sentence about "identified categories of conventional test cases that are not amenable for test generalization and proposed new PUT patterns" IF true.
 
 %-------------------------------------------------------------------------
 
